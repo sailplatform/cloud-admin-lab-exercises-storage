@@ -20,7 +20,7 @@ The storage account in `lab-storage-blob03-rg` must have:
 | # | Requirement | Value |
 |---|-------------|-------|
 | 1 | Public blob access **disabled** | `allowBlobPublicAccess = false` |
-| 2 | Minimum TLS version | `minimumTlsVersion = TLS1_3` |
+| 2 | Minimum TLS version | `minimumTlsVersion = TLS1_2` |
 
 ## Work the question
 
