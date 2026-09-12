@@ -36,7 +36,6 @@ acct_field() {
 acct_exists()       { [[ -n "$(acct_name)" ]]; }
 # `-o tsv` may print False/false by CLI version — match either (portable to bash 3.2).
 public_disabled() { [[ "$(acct_field allowBlobPublicAccess)" == [Ff]alse ]]; }
-tls_is_12()       { [[ "$(acct_field minimumTlsVersion)" == "TLS1_2" ]]; }
 
 # The real proof: an anonymous (no-auth) GET of the exposed blob must be refused.
 # primaryEndpoints.blob is like https://<acct>.blob.core.windows.net/  (trailing /).
@@ -57,7 +56,6 @@ echo "======================================================"
 check "A storage account exists in '$RG'"               acct_exists
 check "Public blob access is disabled (false)"          public_disabled
 check "Anonymous GET of the blob is refused (HTTP 403)" blob_blocked
-check "Minimum TLS version is TLS1_2"                   tls_is_12
 
 echo ""
 echo "Results: $PASS/$TOTAL passed, $FAIL failed"

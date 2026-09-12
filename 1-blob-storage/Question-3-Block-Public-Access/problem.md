@@ -4,8 +4,8 @@
 
 A security review flagged a storage account: a container is set to **anonymous
 public access**, so anyone with the blob's URL can read it — no credentials
-required. The account also still **accepts old TLS versions**. As the cloud
-administrator, prove the exposure, then harden the account.
+required. As the cloud administrator, prove the exposure, then harden the account
+so the data can't be read without authentication.
 
 `setup.bash` provisions the account in this insecure state and uploads a file
 (`secret.txt`) into a public container so there is something real to test. Before
@@ -20,7 +20,6 @@ The storage account in `lab-storage-blob03-rg` must have:
 | # | Requirement | Value |
 |---|-------------|-------|
 | 1 | Public blob access **disabled** | `allowBlobPublicAccess = false` |
-| 2 | Minimum TLS version | `minimumTlsVersion = TLS1_2` |
 
 ## Work the question
 

@@ -30,19 +30,10 @@ plain public web address. That is why an exposed container is dangerous.
   the whole account. This account-level switch overrides the container's own
   `public-access` setting, so it shuts the door even though the container is still
   marked `blob`. New accounts default to `false`; setup turned it on.
-- **`--min-tls-version TLS1_2`** — run `az storage account update --help` for the
-  allowed values (`TLS1_0, TLS1_1, TLS1_2, TLS1_3`). **TLS 1.2 is the safe modern
-  minimum.** The account **default is `TLS1_0`** (per the docs), which is *not*
-  secure — so you set this one deliberately.
-  > The `--help` list is client-side: it names every value the *feature* can take,
-  > not what your region/subscription supports. `TLS1_3`-as-minimum isn't available
-  > in every region yet, so it can fail server-side with
-  > `FeatureNotSupported: MinimumTlsVersion 1.3`. `TLS1_2` works everywhere — a good
-  > reminder that *allowed values ≠ regionally available*.
 
 ```bash
 az storage account update -g lab-storage-blob03-rg -n "$ACCT" \
-  --allow-blob-public-access false --min-tls-version TLS1_2
+  --allow-blob-public-access false
 ```
 
 ## Move 3 — confirm it's closed
@@ -51,17 +42,14 @@ az storage account update -g lab-storage-blob03-rg -n "$ACCT" \
 curl -i "$URL"      # -> HTTP/1.1 403, <Error><Code>PublicAccessNotPermitted</Code>...
 ```
 
-The same URL that served the file a minute ago now refuses it. (TLS is harder to
-see with curl — modern curl already speaks 1.2/1.3 — so verify that one from the
-control plane below.)
+The same URL that served the file a minute ago now refuses it.
 
-**Verify settings:** `az storage account show -g lab-storage-blob03-rg -n "$ACCT" --query "{public:allowBlobPublicAccess, tls:minimumTlsVersion}" -o table`
+**Verify the setting:** `az storage account show -g lab-storage-blob03-rg -n "$ACCT" --query "{public:allowBlobPublicAccess}" -o table`
 
 | Goal | Command |
 |------|---------|
 | Get a blob's public URL | `az storage blob url --account-name <acct> --container-name <c> --name <b> --auth-mode key -o tsv` |
 | Test anonymous access | `curl -i "<url>"` (200 = exposed, 403 = blocked) |
-| See update flags + allowed values | `az storage account update --help` |
+| See update flags | `az storage account update --help` |
 | Block public blob access | `az storage account update -g <rg> -n <acct> --allow-blob-public-access false` |
-| Enforce TLS 1.2 | `az storage account update -g <rg> -n <acct> --min-tls-version TLS1_2` |
-| Check current settings | `az storage account show -g <rg> -n <acct> --query "{public:allowBlobPublicAccess, tls:minimumTlsVersion}" -o table` |
+| Check current setting | `az storage account show -g <rg> -n <acct> --query "{public:allowBlobPublicAccess}" -o table` |

@@ -3,10 +3,10 @@
 #  setup.bash — Blob Q3: Lock Down the Storage Account
 # ============================================================================
 #  Provisions a DELIBERATELY EXPOSED account so you can SEE the problem before
-#  you fix it: public blob access is ON, TLS 1.0 is allowed, and a container is
-#  set to anonymous ('blob') access with a real file uploaded into it. After
-#  setup, you can open the printed URL in a browser (or curl it) and read the
-#  file with no credentials — that's the exposure you'll close.
+#  you fix it: public blob access is ON, and a container is set to anonymous
+#  ('blob') access with a real file uploaded into it. After setup, you can open
+#  the printed URL in a browser (or curl it) and read the file with no
+#  credentials — that's the exposure you'll close.
 #
 #  Real, billable resources. Re-runnable: reuses an existing account/container.
 # ============================================================================
@@ -44,9 +44,9 @@ if [[ -n "$ACCT" ]]; then
   echo "  [OK] Storage account '$ACCT' already exists — reusing it."
 else
   ACCT="labstore${RANDOM}${RANDOM}"
-  echo "  Provisioning EXPOSED storage account '$ACCT' (public access on, TLS 1.0)... ~20s."
+  echo "  Provisioning EXPOSED storage account '$ACCT' (public blob access on)... ~20s."
   az storage account create -g "$RG" -n "$ACCT" --sku Standard_LRS \
-    --allow-blob-public-access true --min-tls-version TLS1_0 --output none
+    --allow-blob-public-access true --output none
 fi
 
 echo "  Creating an anonymously-readable container '$CONTAINER' and uploading '$BLOB'..."
@@ -68,7 +68,7 @@ echo "  >> SEE THE PROBLEM FIRST. Open that URL in a browser, or run:"
 echo "         curl -i \"${URL}\""
 echo "     You'll get HTTP 200 and the file contents — no login needed."
 echo ""
-echo "  Your task: block anonymous access (allowBlobPublicAccess=false) and"
-echo "  require minimumTlsVersion=TLS1_2. Then curl the URL again -> expect 403."
+echo "  Your task: block anonymous access (allowBlobPublicAccess=false)."
+echo "  Then curl the URL again -> expect 403."
 echo "  Validate with:  ./validate.bash"
 echo "======================================================"
