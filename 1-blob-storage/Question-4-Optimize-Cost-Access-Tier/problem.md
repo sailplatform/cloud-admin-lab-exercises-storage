@@ -9,24 +9,10 @@ to store (in exchange for higher per-read charges and a 30-day minimum retention
 As the cloud administrator, move the account's default access tier to **Cool**.
 
 `setup.bash` provisions the account on Hot and uploads a file whose tier is
-*inferred* from the account default — so you can watch it follow the account.
-
-## Do it in three moves — *observe* the tier change
-
-**1. See the starting state.** After `./setup.bash`, check both the account and
-the blob — both report **Hot**:
-
-```bash
-az storage account show -g lab-storage-blob04-rg -n <acct> --query accessTier -o tsv
-az storage blob show --account-name <acct> --container-name data \
-  --name report.csv --auth-mode key --query properties.blobTier -o tsv
-```
-
-**2. Change it.** Set the account default access tier to Cool.
-
-**3. Confirm.** Re-run the two commands. Both now report **Cool** — the blob never
-had its own tier, so it inherited the account's new default. That inheritance is
-the lesson: set the account default once and existing untagged blobs follow.
+*inferred* from the account default. Check the account and the blob before and
+after your change: because the blob has no tier of its own, it follows the
+account default — set the account to Cool and watch the blob move with it.
+(Walkthrough in `solution.md`.)
 
 ## Requirements
 

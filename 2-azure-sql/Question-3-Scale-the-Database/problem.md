@@ -21,21 +21,9 @@ the **Standard S0** performance level (10 DTU).
   DTU count: `Basic` (5 DTU), `S0` (10 DTU), `S1` (20 DTU), and up. **Scaling a
   DTU database is just changing this one value.**
 
-## Do it in three moves — *watch the level change*
-
-**1. See the starting state** — Basic, 5 DTU:
-
-```bash
-az sql db show -g lab-storage-sql03-rg -s <server> -n appdb \
-  --query "{tier:edition, objective:currentServiceObjectiveName, dtu:sku.capacity}" -o table
-# tier   objective   dtu
-# Basic  Basic       5
-```
-
-**2. Scale it** to S0.
-
-**3. Confirm** — re-run the same command; it now reads Standard / S0 / 10. The
-database stayed **Online** the whole time (no downtime, no data lost).
+Check the database's level before and after: it starts at Basic / 5 DTU, and after
+you scale it reads Standard / S0 / 10 DTU — while staying **Online** the whole time
+(no downtime, no data lost). (Walkthrough in `solution.md`.)
 
 ## Requirements
 

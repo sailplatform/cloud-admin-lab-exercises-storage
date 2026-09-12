@@ -8,26 +8,9 @@ from their workstation. As the cloud administrator, open the server firewall for
 client IP — then prove a client can now connect.
 
 `setup.bash` provisions the server and `appdb` for you (you set the password).
-
-## Do it in three moves — *watch the connection change*
-
-You need a SQL client. **Azure Cloud Shell has `sqlcmd` built in** (zero install);
-on the Ubuntu jumpbox you can install it (see solution.md).
-
-**1. See it blocked.** Try to connect — the gateway refuses you *by name*:
-
-```bash
-sqlcmd -S <server>.database.windows.net -U sqladmin -P '<your-password>' \
-  -d appdb -Q "SELECT 'connected' AS status"
-# -> ...Client with IP address 'x.x.x.x' is not allowed to access the server...
-```
-
-Note the IP it reports — that's the client you must allow.
-
-**2. Open the firewall.** Add a rule for that IP.
-
-**3. Confirm.** Run the exact same `sqlcmd` again — it now returns a row. Same
-command, refused a minute ago, working now: that's the firewall doing its job.
+Prove it end-to-end with a SQL client (`sqlcmd`): try to connect *before* adding a
+rule and the gateway refuses you by IP; add the rule; run the same command and it
+returns a row. (Walkthrough — including where to get `sqlcmd` — in `solution.md`.)
 
 ## Requirements
 

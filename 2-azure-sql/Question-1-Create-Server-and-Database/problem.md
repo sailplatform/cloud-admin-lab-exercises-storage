@@ -21,18 +21,10 @@ pick e.g. `labsql<initials><digits>`. The validator finds the server in your
 resource group, so the exact name is your choice. **The admin password is a secret
 only you set** — never put it in a script or share it.*
 
-## Observe that it's real
-
-A create question is "done" when the resource is actually **running**. After you
-build it, confirm the database reports **Online** on the **Basic** tier:
-
-```bash
-az sql db show -g lab-storage-sql01-rg -s <server> -n appdb \
-  --query "{name:name, tier:edition, status:status}" -o table
-```
-
-You'll notice you still can't *connect* a SQL client to it from your laptop — the
-server firewall blocks all IPs by default. Opening that is **Question 2**.
+Once it's built, confirm the database reports **Online** on the **Basic** tier
+(walkthrough in `solution.md`). You'll notice you still can't *connect* a SQL
+client to it — the server firewall blocks all IPs by default. Opening that is
+**Question 2**.
 
 ## Work the question
 

@@ -12,32 +12,13 @@ you keep paying only for storage), and **auto-resumes** on the next connection.
 As the cloud administrator, convert `appdb` to Serverless with a 60-minute
 auto-pause delay. This is the database analogue of *deallocating* an idle VM.
 
-## Do it in three moves — *watch the settings appear*
-
-**1. See the starting state.** A provisioned database has no auto-pause settings:
-
-```bash
-az sql db show -g lab-storage-sql04-rg -s <server> -n appdb \
-  --query "{sku:currentServiceObjectiveName, autoPause:autoPauseDelay, minCap:minCapacity}" -o table
-# sku          autoPause    minCap
-# GP_Gen5_1                            <- autoPause / minCap are blank (null)
-```
-
-**2. Convert it** to Serverless with auto-pause.
-
-**3. Confirm.** Re-run the same command. The SKU gains an `_S_` (serverless) and the
-two auto-pause fields now have values:
-
-```
-# sku            autoPause    minCap
-# GP_S_Gen5_1    60           0.5
-```
-
-Those settings appearing where there were none is the change you can see now.
-The **pause itself** happens only after 60 minutes with no connections (that's the
-minimum Azure allows) — so you won't watch it flip during the lab, but from now on
-`az sql db show --query status` will report `Paused` after an idle hour, and your
-next query resumes it in a few seconds.
+`setup.bash` provisions `appdb` as a provisioned database. Check its settings
+before and after: a provisioned database has no auto-pause fields, and after you
+convert it the SKU gains an `_S_` (serverless) and the auto-pause settings appear.
+The pause *itself* happens only after 60 minutes idle (Azure's minimum), so you
+won't watch it flip during the lab — but from then on `az sql db show --query
+status` reports `Paused` after an idle hour, and the next query resumes it in
+seconds. (Walkthrough in `solution.md`.)
 
 ## Requirements
 
