@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# ============================================================================
+#  setup.bash — Azure SQL Q3: Scale the Database
+# ============================================================================
+#  Provisions a SQL logical server + 'appdb' on the BASIC tier so you have a
+#  live database to scale up. YOU type the admin password when prompted (this
+#  script executes the create, so it needs a real value; it is never stored).
+#  Real, billable resources. Re-runnable: reuses an existing server/database.
+# ============================================================================
+set -uo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+find_config() {
+  local dir="$SCRIPT_DIR"
+  while [[ "$dir" != "/" ]]; do
+    if [[ -f "$dir/lab-config.sh" ]]; then echo "$dir/lab-config.sh"; return 0; fi
+    dir="$(dirname "$dir")"
+  done
+  return 1
+}
+CONFIG="$(find_config)" || { echo "ERROR: could not find lab-config.sh" >&2; exit 1; }
+# shellcheck source=/dev/null
+source "$CONFIG"
+
+RG="$(lab_rg sql03)"
+
+echo "======================================================"
+echo " Azure SQL Q3 — Scale the Database"
+echo "======================================================"
+command -v az >/dev/null 2>&1 || { echo "  [X] Azure CLI not installed"; exit 1; }
+az account show >/dev/null 2>&1 || { echo "  [X] Not logged in. Run: az login"; exit 1; }
+echo "  [OK] Azure CLI present and logged in."
+
+echo "  Ensuring resource group '$RG' in '$LAB_LOCATION'..."
+az group create --name "$RG" --location "$LAB_LOCATION" --output none
+
+SRV="$(az sql server list -g "$RG" --query "[0].name" -o tsv 2>/dev/null)"
+if [[ -n "$SRV" ]]; then
+  echo "  [OK] SQL server '$SRV' already exists — reusing it."
+else
+  if [[ ! -t 0 ]]; then
+    echo "  [X] Run this in an interactive terminal — it will prompt for a password."; exit 1
+  fi
+  read -r -s -p "  Set an admin password for the lab server (input hidden): " PW; echo
+  [[ -z "$PW" ]] && { echo "  [X] No password entered."; exit 1; }
+  SRV="labsql${RANDOM}${RANDOM}"
+  echo "  Provisioning SQL server '$SRV' (login '${LAB_SQL_ADMIN}')... ~1-2 min."
+  az sql server create -g "$RG" -n "$SRV" -u "$LAB_SQL_ADMIN" -p "$PW" --output none \
+    || { echo "  [X] Server create failed (name taken globally? try again)."; exit 1; }
+  unset PW
+  echo "  Creating database 'appdb' on the BASIC tier..."
+  az sql db create -g "$RG" -s "$SRV" -n appdb -e Basic --output none
+fi
+
+echo "------------------------------------------------------"
+echo "   Resource group : ${RG}"
+echo "   SQL server      : ${SRV}"
+echo "   Database        : appdb  (currently BASIC / 5 DTU)"
+echo ""
+echo "  >> SEE THE STARTING STATE — Basic edition, 5 DTU:"
+echo "       az sql db show -g ${RG} -s ${SRV} -n appdb \\"
+echo "         --query '{tier:edition, objective:currentServiceObjectiveName, dtu:sku.capacity}' -o table"
+echo ""
+echo "  Your task: 'appdb' needs more throughput — scale it to the Standard S0"
+echo "  performance level (10 DTU). Then re-run the command and watch it change."
+echo "  Validate with:  ./validate.bash"
+echo "======================================================"
