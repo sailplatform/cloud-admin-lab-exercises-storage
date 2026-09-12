@@ -20,7 +20,7 @@ SRV=$(az sql server list -g lab-storage-sql04-rg --query "[0].name" -o tsv)
 
 az sql db show -g lab-storage-sql04-rg -s "$SRV" -n appdb \
   --query "{sku:currentServiceObjectiveName, autoPause:autoPauseDelay, minCap:minCapacity}" -o table
-# GP_Gen5_1 / (blank) / (blank)
+# GP_Gen5_2 / (blank) / (blank)
 ```
 
 ## Move 2 — convert to serverless

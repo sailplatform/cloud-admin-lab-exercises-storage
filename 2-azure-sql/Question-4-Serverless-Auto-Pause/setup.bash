@@ -63,9 +63,10 @@ else
   az sql server create -g "$RG" -n "$SRV" -u "$LAB_SQL_ADMIN" -p "$PW" --output none \
     || { echo "  [X] Server create failed (name taken globally? try again)."; exit 1; }
   unset PW
-  echo "  Creating 'appdb' as PROVISIONED General Purpose (Gen5, 1 vCore)... ~1 min."
+  # Provisioned GP Gen5 starts at 2 vCores (1 vCore is serverless-only), so create at 2.
+  echo "  Creating 'appdb' as PROVISIONED General Purpose (Gen5, 2 vCore)... ~1 min."
   az sql db create -g "$RG" -s "$SRV" -n appdb \
-    -e GeneralPurpose -f Gen5 -c 1 --output none
+    -e GeneralPurpose -f Gen5 -c 2 --output none
 fi
 
 echo "------------------------------------------------------"
@@ -76,7 +77,7 @@ echo ""
 echo "  >> SEE THE STARTING STATE. Provisioned has NO auto-pause settings:"
 echo "       az sql db show -g ${RG} -s ${SRV} -n appdb \\"
 echo "         --query '{sku:currentServiceObjectiveName, autoPause:autoPauseDelay, minCap:minCapacity}' -o table"
-echo "     -> sku GP_Gen5_1, autoPause and minCap are blank (null)."
+echo "     -> sku GP_Gen5_2, autoPause and minCap are blank (null)."
 echo ""
 echo "  Your task: convert 'appdb' to the Serverless compute model with"
 echo "  auto-pause after 60 minutes idle (min 0.5 vCore, max 1 vCore). Then"
