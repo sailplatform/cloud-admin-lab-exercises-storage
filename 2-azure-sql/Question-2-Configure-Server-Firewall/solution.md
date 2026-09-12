@@ -18,9 +18,19 @@ sqlcmd -S "$FQDN" -U sqladmin -P '<your-password>' -d appdb -Q "SELECT 'connecte
 # -> Cannot open server ... Client with IP address 'x.x.x.x' is not allowed...
 ```
 
-> No `sqlcmd`? Use **Azure Cloud Shell** (it's preinstalled). On the Ubuntu
-> jumpbox, install it once from Microsoft's package repo:
-> `curl -sSL -O https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb && sudo dpkg -i packages-microsoft-prod.deb && sudo apt-get update && sudo apt-get install -y sqlcmd`
+> **No `sqlcmd`?** Easiest is **Azure Cloud Shell** (it's preinstalled — just add a
+> firewall rule for Cloud Shell's egress IP the same way). To install it on the
+> Ubuntu jumpbox, use Microsoft's `mssql-tools18` package (the `sqlcmd`/`bcp`
+> tools). Note the package is **`mssql-tools18`**, *not* `sqlcmd`, it needs the
+> EULA accepted, and it installs under `/opt/mssql-tools18/bin`:
+>
+> ```bash
+> curl -sSL -O https://packages.microsoft.com/config/ubuntu/$(lsb_release -rs)/packages-microsoft-prod.deb
+> sudo dpkg -i packages-microsoft-prod.deb
+> sudo apt-get update
+> sudo ACCEPT_EULA=Y apt-get install -y mssql-tools18 unixodbc-dev
+> echo 'export PATH="$PATH:/opt/mssql-tools18/bin"' >> ~/.bashrc && source ~/.bashrc
+> ```
 
 ## Move 2 — allow your IP
 
