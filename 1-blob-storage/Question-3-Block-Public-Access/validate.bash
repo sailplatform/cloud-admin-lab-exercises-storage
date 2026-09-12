@@ -39,13 +39,15 @@ public_disabled() { [[ "$(acct_field allowBlobPublicAccess)" == [Ff]alse ]]; }
 
 # The real proof: an anonymous (no-auth) GET of the exposed blob must be refused.
 # primaryEndpoints.blob is like https://<acct>.blob.core.windows.net/  (trailing /).
+# Disabling public access AT THE ACCOUNT LEVEL returns 409 PublicAccessNotPermitted;
+# a container-level/other refusal returns 403. Accept either as "blocked".
 blob_blocked() {
   local base url code
   base="$(acct_field primaryEndpoints.blob)" || return 1
   [[ -z "$base" ]] && return 1
   url="${base}public-data/secret.txt"
   code="$(curl -s -o /dev/null -w '%{http_code}' "$url" 2>/dev/null)"
-  [[ "$code" == "403" ]]
+  [[ "$code" == "403" || "$code" == "409" ]]
 }
 
 echo "======================================================"
@@ -55,7 +57,7 @@ echo "======================================================"
 
 check "A storage account exists in '$RG'"               acct_exists
 check "Public blob access is disabled (false)"          public_disabled
-check "Anonymous GET of the blob is refused (HTTP 403)" blob_blocked
+check "Anonymous GET of the blob is refused (403/409)"  blob_blocked
 
 echo ""
 echo "Results: $PASS/$TOTAL passed, $FAIL failed"

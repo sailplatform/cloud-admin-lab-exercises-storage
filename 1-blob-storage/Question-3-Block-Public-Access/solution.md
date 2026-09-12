@@ -39,17 +39,20 @@ az storage account update -g lab-storage-blob03-rg -n "$ACCT" \
 ## Move 3 — confirm it's closed
 
 ```bash
-curl -i "$URL"      # -> HTTP/1.1 403, <Error><Code>PublicAccessNotPermitted</Code>...
+curl -i "$URL"      # -> HTTP/1.1 409, <Error><Code>PublicAccessNotPermitted</Code>...
 ```
 
-The same URL that served the file a minute ago now refuses it.
+The same URL that served the file a minute ago now refuses it. Disabling public
+access *at the account level* returns **409 `PublicAccessNotPermitted`** (a
+container-level or other auth refusal would be 403) — either way, the anonymous
+request is blocked.
 
 **Verify the setting:** `az storage account show -g lab-storage-blob03-rg -n "$ACCT" --query "{public:allowBlobPublicAccess}" -o table`
 
 | Goal | Command |
 |------|---------|
 | Get a blob's public URL | `az storage blob url --account-name <acct> --container-name <c> --name <b> --auth-mode key -o tsv` |
-| Test anonymous access | `curl -i "<url>"` (200 = exposed, 403 = blocked) |
+| Test anonymous access | `curl -i "<url>"` (200 = exposed; 403/409 = blocked) |
 | See update flags | `az storage account update --help` |
 | Block public blob access | `az storage account update -g <rg> -n <acct> --allow-blob-public-access false` |
 | Check current setting | `az storage account show -g <rg> -n <acct> --query "{public:allowBlobPublicAccess}" -o table` |
