@@ -33,6 +33,19 @@ command -v az >/dev/null 2>&1 || { echo "  [X] Azure CLI not installed"; exit 1;
 az account show >/dev/null 2>&1 || { echo "  [X] Not logged in. Run: az login"; exit 1; }
 echo "  [OK] Azure CLI present and logged in."
 
+# Azure SQL needs the Microsoft.Sql resource provider registered on the subscription
+# (one-time). A fresh subscription usually isn't, which fails create with
+# MissingSubscriptionRegistration.
+SQL_RP="$(az provider show --namespace Microsoft.Sql --query registrationState -o tsv 2>/dev/null)"
+if [[ "$SQL_RP" != "Registered" ]]; then
+  echo "  Registering the Microsoft.Sql resource provider (one-time, ~1-2 min)..."
+  az provider register --namespace Microsoft.Sql --wait \
+    || { echo "  [X] Could not register Microsoft.Sql (need Contributor/Owner on the subscription)."; exit 1; }
+  echo "  [OK] Microsoft.Sql registered."
+else
+  echo "  [OK] Microsoft.Sql resource provider already registered."
+fi
+
 echo "  Ensuring resource group '$RG' in '$LAB_LOCATION'..."
 az group create --name "$RG" --location "$LAB_LOCATION" --output none
 
